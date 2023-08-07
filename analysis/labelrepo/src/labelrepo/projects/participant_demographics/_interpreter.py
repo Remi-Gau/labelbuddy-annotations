@@ -32,7 +32,7 @@ class _RangeParser:
             raw_value,
         )
         assert match is not None
-        return float(match.group(1)), float(match.group(2))
+        return float(match[1]), float(match[2])
 
 
 class _Completer:
@@ -92,8 +92,8 @@ class _DiagnosisCompleter(_Completer):
             )
         if attribute_name not in node.attributes:
             return
-        if not any(
-            attribute_name in child.attributes
+        if all(
+            attribute_name not in child.attributes
             for child in node.children.values()
         ):
             for child_name, child in node.children.items():
@@ -423,9 +423,7 @@ class _Attribute:
     def _get_reason(self, nestable=True):
         if self.reason is None:
             return repr(self.value)
-        if not nestable:
-            return self.reason
-        return f"( {self.reason} )"
+        return self.reason if not nestable else f"( {self.reason} )"
 
     def __str__(self):
         return repr(self.value)
@@ -699,7 +697,7 @@ def _parse_token(
         "start_char": start_char,
         "end_char": end_char,
     }
-    token_data.update(_get_group_and_subgroup(annotation_stack))
+    token_data |= _get_group_and_subgroup(annotation_stack)
     token_data.update(_get_sex(annotation_stack))
     token_data.update(_get_payload(annotation_stack))
     try:

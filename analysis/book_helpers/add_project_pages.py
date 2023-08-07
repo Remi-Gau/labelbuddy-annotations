@@ -53,13 +53,13 @@ def get_labels(project_name):
                 : annotation["start_char"] - annotation["context_start_char"]
             ]
             if annotation["context_start_char"] != 0:
-                prefix = "…" + prefix
+                prefix = f"…{prefix}"
             annotation["prefix"] = prefix
             suffix = annotation["context"][
                 annotation["end_char"] - annotation["context_start_char"] :
             ]
             if annotation["context_end_char"] != annotation["doc_length"]:
-                suffix = suffix + "…"
+                suffix = f"{suffix}…"
             annotation["suffix"] = suffix
 
         all_labels.append(label_info)
@@ -77,9 +77,7 @@ def escape_quotes(value, jsonify=True):
         )
     if isinstance(value, dict):
         return {k: escape_quotes(v, False) for k, v in value.items()}
-    if isinstance(value, list):
-        return [escape_quotes(v) for v in value]
-    return value
+    return [escape_quotes(v) for v in value] if isinstance(value, list) else value
 
 
 helpers_dir = pathlib.Path(__file__).parent.resolve()
@@ -117,8 +115,10 @@ or the templates in /analysis/book_helpers/templates/
 
 for project_name in all_projects:
     project_dir = repo.repo_root() / "projects" / project_name
-    project_info = {"project_name": project_name}
-    project_info["readme_content"] = get_readme(project_dir)
+    project_info = {
+        "project_name": project_name,
+        "readme_content": get_readme(project_dir),
+    }
     project_info["labels"] = get_labels(project_name)
     project_info["warning_automatically_generated_page"] = WARNING_AUTO_GEN
     try:

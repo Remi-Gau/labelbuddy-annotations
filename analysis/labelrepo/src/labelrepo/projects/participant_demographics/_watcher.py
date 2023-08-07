@@ -158,8 +158,8 @@ class _Watcher:
             "no_doc_positions": True,
             "noscript": True,
         }
-        template_params.update(
-            _participant_demographics._get_template_data(self.labelbuddy_file)
+        template_params |= _participant_demographics._get_template_data(
+            self.labelbuddy_file
         )
         self.content = self.template.render(template_params)
 

@@ -42,7 +42,7 @@ def _convert_osf_url_to_download(url: str) -> str:
     match = re.match(r"^https://osf.io/(?:download/)?([0-9a-zA-Z]+)/?$", url)
     if match is None:
         return url
-    osf_id = match.group(1)
+    osf_id = match[1]
     return f"https://osf.io/download/{osf_id}/"
 
 
@@ -151,7 +151,4 @@ def get_project_datasets(project_name: str) -> List[pathlib.Path]:
     if not sources_json.is_file():
         return []
     sources_info = json.loads(sources_json.read_text("UTF-8"))
-    result = []
-    for source in sources_info:
-        result.append(get_dataset(source["url"]))
-    return result
+    return [get_dataset(source["url"]) for source in sources_info]

@@ -175,17 +175,14 @@ def get_participant_demographics() -> pd.DataFrame:
             k: doc[k] for k in ("project_name", "annotator_name", "pmcid")
         }
         for gn, sgn, subgroup in doc["participants"].subgroups():
-            row = {"group_name": gn, "subgroup_name": sgn}
-            row.update(doc_info)
+            row = {"group_name": gn, "subgroup_name": sgn} | doc_info
             for k, v in subgroup.attributes.items():
                 row[k] = v.value
             for sex in ("female", "male"):
-                try:
+                with contextlib.suppress(KeyError):
                     row[f"{sex} count"] = (
                         subgroup.children[sex].attributes["count"].value
                     )
-                except KeyError:
-                    pass
             all_rows.append(row)
     return pd.DataFrame(all_rows)
 
@@ -249,7 +246,7 @@ def get_report(
     }
     if errors_only:
         info["title"] = "Participant demographics annotation errors"
-    info.update(_get_template_data())
+    info |= _get_template_data()
     if annotator_name is not None:
         info["annotator_name"] = annotator_name
     if project_name is not None:
@@ -322,7 +319,6 @@ def get_annotation_stacks_display(
     stacks = _get_annotation_stacks(annotations)
     jinja_env = _get_jinja_env()
     template = jinja_env.get_template("annotation_stack_list.html")
-    html = template.render(
+    return template.render(
         {"standalone": standalone, "annotation_stacks": stacks}
     )
-    return html

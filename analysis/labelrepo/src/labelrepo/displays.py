@@ -91,9 +91,7 @@ def _get_project_name_or_link(project_name):
 
 
 def _get_color(color: Any) -> str:
-    if not color:
-        return "#e0e0e0"
-    return str(color)
+    return "#e0e0e0" if not color else str(color)
 
 
 def _get_css(basename: str) -> str:
@@ -198,12 +196,12 @@ def split_annotation_context(
         : annotation["start_char"] - annotation["context_start_char"]
     ]
     if annotation["context_start_char"] != 0:
-        prefix = "…" + prefix
+        prefix = f"…{prefix}"
     suffix = annotation["context"][
         annotation["end_char"] - annotation["context_start_char"] :
     ]
     if annotation["context_end_char"] != annotation["doc_length"]:
-        suffix = suffix + "…"
+        suffix = f"{suffix}…"
     return prefix, annotation["selected_text"], suffix
 
 

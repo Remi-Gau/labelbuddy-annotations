@@ -47,25 +47,21 @@ def last_modified_labelbuddy_file():
         (lbf.stat().st_mtime, lbf)
         for lbf in (repo_root() / "projects").glob("**/*.labelbuddy")
     )
-    if not lb_files:
-        return None
-    return lb_files[-1][1]
+    return None if not lb_files else lb_files[-1][1]
 
 
 def annotator_name(suggested_name: Optional[str] = None) -> str:
     if suggested_name:
         return suggested_name
-    name = os.environ.get("LABELBUDDY_ANNOTATOR_NAME", "")
-    if name:
+    if name := os.environ.get("LABELBUDDY_ANNOTATOR_NAME", ""):
         return name
     try:
-        name = (
+        if name := (
             subprocess.run(["git", "config", "User.Name"], capture_output=True)
             .stdout.decode("utf-8")
             .strip()
             .replace(" ", "_")
-        )
-        if name:
+        ):
             return name
     except Exception:
         pass

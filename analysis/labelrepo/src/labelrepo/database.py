@@ -63,12 +63,12 @@ def _insert_project_documents(
 
 
 def _extract_metadata_from_text(doc_info: Mapping[str, Any]) -> Dict[str, str]:
-    metadata = {}
-    for field, (start, end) in (
-        doc_info["metadata"].get("field_positions", {}).items()
-    ):
-        metadata[field] = doc_info["text"][start:end]
-    return metadata
+    return {
+        field: doc_info["text"][start:end]
+        for field, (start, end) in (
+            doc_info["metadata"].get("field_positions", {}).items()
+        )
+    }
 
 
 def _insert_documents(
@@ -85,10 +85,11 @@ def _insert_documents(
         with open(docs_file, "r", encoding="utf-8") as docs_fh:
             for doc_line in docs_fh:
                 doc_info = json.loads(doc_line)
-                doc_row = {}
-                doc_row["md5"] = hashlib.md5(
-                    doc_info["text"].encode("utf-8")
-                ).digest()
+                doc_row = {
+                    "md5": hashlib.md5(
+                        doc_info["text"].encode("utf-8")
+                    ).digest()
+                }
                 doc_row["text"] = doc_info["text"]
                 text_metadata = _extract_metadata_from_text(doc_info)
                 for field, field_type in metadata_field_types.items():
@@ -231,10 +232,8 @@ def make_database(
         _fill_database(tmp_db_path)
         tmp_db_path.rename(database_path)
     finally:
-        try:
+        with contextlib.suppress(Exception):
             os.unlink(tmp_db_path)
-        except Exception:
-            pass
     print(f"Database created in {database_path}")
     return database_path
 
